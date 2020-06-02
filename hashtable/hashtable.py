@@ -7,6 +7,9 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def __repr__(self):
+        return f'HashTableEntry({repr(self.key)},{repr(self.value)}'
+
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
@@ -20,8 +23,9 @@ class HashTable:
     Implement this.
     """
 
-    def __init__(self, capacity):
-        # Your code here
+    def __init__(self, capacity=MIN_CAPACITY):
+        self.storage = [None] * capacity
+
 
 
     def get_num_slots(self):
@@ -35,7 +39,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        return len(self.storage)
 
     def get_load_factor(self):
         """
@@ -46,6 +50,7 @@ class HashTable:
         # Your code here
 
 
+
     def fnv1(self, key):
         """
         FNV-1 Hash, 64-bit
@@ -54,6 +59,13 @@ class HashTable:
         """
 
         # Your code here
+        hval = 0x811c9dc5
+        fnv_32_prime = 0x01000193
+        uint32_max = 2 ** 32
+        for s in key:
+            hval = hval ^ ord(s)
+            hval = (hval * fnv_32_prime) % uint32_max
+        return hval
 
 
     def djb2(self, key):
@@ -70,8 +82,8 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
-        return self.djb2(key) % self.capacity
+        return self.fnv1(key) % self.get_num_slots()
+        #return self.djb2(key) % self.get_num_slots()
 
     def put(self, key, value):
         """
@@ -82,6 +94,10 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        self.storage[index] = HashTableEntry(key, value)
+
+
 
 
     def delete(self, key):
@@ -93,6 +109,8 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        self.put(key, None)
 
 
     def get(self, key):
@@ -104,7 +122,13 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+        hash_entry = self.storage[index]
 
+        if hash_entry is not None:
+            return hash_entry.value
+
+        return None
 
     def resize(self, new_capacity):
         """
